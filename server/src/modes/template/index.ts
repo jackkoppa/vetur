@@ -23,7 +23,7 @@ export class VueHTMLMode implements LanguageMode {
     vueInfoService?: VueInfoService
   ) {
     this.htmlMode = new HTMLMode(documentRegions, workspacePath, vueInfoService);
-    this.vueInterpolationMode = new VueInterpolationMode(tsModule, serviceHost);
+    this.vueInterpolationMode = new VueInterpolationMode(tsModule, serviceHost, vueInfoService);
   }
   getId() {
     return 'vue-html';
