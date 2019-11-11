@@ -41,7 +41,18 @@ export class VueInterpolationMode implements LanguageMode {
   }
 
   doValidation(document: TextDocument): Diagnostic[] {
-    if (!this.interpolationEnabled || !this.documentTypeChecked(document)) {
+    let documentTypeChecked = false;
+    console.log('hi there');
+  const program = this.serviceHost.jsLanguageService.getProgram();
+  const fileFsPath = getFileFsPath(document.uri);
+  const sourceFile = program && program.getSourceFile(fileFsPath);
+  
+  documentTypeChecked = !!this.vueInfoService && (
+    this.vueInfoService.documentIncludesLanguage(document, 'typescript') ||
+    // ISSUE: Below, sourceFile, type `SourceFile`, does not contain `checkJsDirective` 
+    (sourceFile as any).checkJsDirective && (sourceFile as any).checkJsDirective.enabled
+  );
+    if (!this.interpolationEnabled() || !documentTypeChecked) {
       return [];
     }
 
@@ -224,9 +235,6 @@ export class VueInterpolationMode implements LanguageMode {
 
   private interpolationEnabled(): boolean {
     return _.get(this.config, ['vetur', 'experimental', 'templateInterpolationService'], true);
-  }
-  private documentTypeChecked(document: TextDocument): boolean {
-    return !!this.vueInfoService && this.vueInfoService.documentIncludesLanguage(document, 'typescript');
   }
 }
 

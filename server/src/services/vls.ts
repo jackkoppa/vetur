@@ -93,11 +93,15 @@ export class VLS {
     this.workspacePath = workspacePath;
 
     await this.vueInfoService.init(this.languageModes);
+    const tsdk = params.initializationOptions
+    ? _.get(params.initializationOptions.config, ['typescript', 'tsdk'], false)
+    : false;
     await this.dependencyService.init(
       workspacePath,
       params.initializationOptions
         ? _.get(params.initializationOptions.config, ['vetur', 'useWorkspaceDependencies'], false)
-        : false
+        : false,
+      tsdk
     );
 
     await this.languageModes.init(workspacePath, {

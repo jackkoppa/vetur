@@ -13,6 +13,7 @@ import { getVueSys } from './vueSys';
 import { TemplateSourceMap, stringifySourceMapNodes } from './sourceMap';
 import { isVirtualVueTemplateFile, isVueFile } from './util';
 import { logger } from '../../log';
+import { LanguageService } from 'vscode-css-languageservice';
 
 const NEWLINE = process.platform === 'win32' ? '\r\n' : '\n';
 
@@ -58,6 +59,7 @@ export interface IServiceHost {
   };
   updateExternalDocument(filePath: string): void;
   dispose(): void;
+  jsLanguageService: ts.LanguageService;
 }
 
 /**
@@ -379,7 +381,8 @@ export function getServiceHost(
     updateExternalDocument,
     dispose: () => {
       jsLanguageService.dispose();
-    }
+    },
+    jsLanguageService
   };
 }
 

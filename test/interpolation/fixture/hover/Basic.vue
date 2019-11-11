@@ -13,6 +13,8 @@
 <script>
 export default {
   data () {
+    const mysomething = { myObj: { myProp: undefined }}
+    console.log(mysomething.myObj?.myProp)
     return {
       msg: 'Vetur means "Winter" in icelandic.',
       list: [0, 1, 2]
