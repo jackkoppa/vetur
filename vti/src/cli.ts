@@ -20,6 +20,7 @@ import * as glob from 'glob';
 import * as path from 'path';
 import * as chalk from 'chalk';
 
+
 class NullLogger implements Logger {
   error(_message: string): void {}
   warn(_message: string): void {}
@@ -81,6 +82,22 @@ async function getDiagnostics(workspaceUri: Uri) {
   console.log('');
   let errCount = 0;
 
+
+  const cliProgress = require('cli-progress');
+  
+  // create a new progress bar instance and use shades_classic theme
+  const bar1 = new cliProgress.SingleBar({ 
+    format: 'Interpolating Templates |' + chalk.cyan('{bar}') + '| {percentage}% || {value}/{total} Files',
+    clearOnComplete: true
+  }, cliProgress.Presets.shades_classic);
+  
+  let currentFileIndex = 0;
+
+  // start the progress bar with a total value of 200 and start value of 0
+  bar1.start(absFilePaths.length, currentFileIndex);
+  
+  
+
   for (const absFilePath of absFilePaths) {
     await clientConnection.sendNotification(DidOpenTextDocumentNotification.type, {
       textDocument: {
@@ -92,10 +109,12 @@ async function getDiagnostics(workspaceUri: Uri) {
     });
 
     try {
+      bar1.update(currentFileIndex + 1);
       const res = (await clientConnection.sendRequest('$/getDiagnostics', {
         uri: Uri.file(absFilePath).toString()
       })) as Diagnostic[];
       if (res.length > 0) {
+        bar1.stop();
         console.log('');
         console.log(`${chalk.green('File')} : ${chalk.green(absFilePath)}`);
         res.forEach(d => {
@@ -113,11 +132,20 @@ async function getDiagnostics(workspaceUri: Uri) {
           }
         });
         console.log('');
+        bar1.start(absFilePaths.length, currentFileIndex + 1);
       }
     } catch (err) {
       console.log(err);
     }
+
+    currentFileIndex++;
   }
+
+  // update the current value in your application
+  bar1.update(absFilePaths.length);
+
+  // stop the progress bar
+  bar1.stop();
 
   return errCount;
 }
